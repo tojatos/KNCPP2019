@@ -51,6 +51,7 @@ bool contains(unordered_set<int> v, int i) {
   return v.find(i) != v.end();
 }
 group BFS(group g, UndirectedGraph &u, unordered_set<int> &visited, int i, int m) {
+  if(contains(visited, i)) return g;
   int s = u.size;
   if(i<s/2) ++g.a;
   else ++g.b;
@@ -70,8 +71,20 @@ int how_much(UndirectedGraph &u, int n, int m) {
 	  group g {0, 0};
 	  if(!contains(visited, i)) groups.push_back(BFS(g, u, visited, i, m));
 	}
+
+	int DP[100][100] = {{0}};
+	DP[0][0] = 1;
 	for(auto i : groups) {
-	  cout << i.a << ' ' << i.b << endl;
+	  for(int j = 99; j >= 0; --j) { 
+		for(int k = 99; k >= 0; --k) { 
+		  if(DP[j][k]==1 && j+i.a<100 && k+i.b<100) DP[j+i.a][k+i.b] = 1;
+		}
+	  }
 	}
-	return -1;
+	int max = 0;
+	for(int j = 0; j < n/2; ++j) { 
+	  if(DP[j][j]==1) max = j;
+	}
+
+	return max;
 }
