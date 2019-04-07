@@ -5,8 +5,9 @@ class UndirectedGraph {
   public:
 	UndirectedGraph(int s);
 	void addEdge(int i, int j);
+	set<int> getEdges(int i);
+	const int size;
   private:
-	int size;
 	vector<set<int>> adjList;
 	friend ostream& operator<<(ostream& os, const UndirectedGraph& u);
 };
@@ -14,6 +15,9 @@ UndirectedGraph::UndirectedGraph(int s) : size(s), adjList(s) { }
 void UndirectedGraph::addEdge(int i, int j) {
   adjList[i].insert(j);
   adjList[j].insert(i);
+}
+set<int> UndirectedGraph::getEdges(int i) { 
+  return adjList[i];
 }
 ostream& operator<<(ostream& os, const UndirectedGraph& u) {
   int cnt = 0;
@@ -29,6 +33,7 @@ struct group {
   int a;
   int b;
 };
+int how_much(UndirectedGraph &u, int n, int m);
 void start() {
   int t; cin >> t;
   while(t--) {
@@ -39,37 +44,34 @@ void start() {
 	  cin >> tmp1 >> tmp2;
 	  u.addEdge(tmp1-1, n+tmp2-1);
 	}
-	cout << u;
-//	for(int i = 0; i < m*2; ++i) {
-//	  for(int j = 0; j < m*2; ++j) {
-//		cout << matrix[i][j] << ' ';
-//	  }
-//	  cout << endl;
-//	}
-
-//	vector<group> groups;
-//	bool visited[m*2][m*2];
-//	memset(visited, 0, sizeof(visited));
-//	group g {0, 0};
-//	for(int i = 0; i < m*2; ++i) {
-//	  for(int j = 0; j < m*2; ++j) {
-//		if(visited[i][j]) continue;
-//		visited[i][j] = true;
-//		visited[j][i] = true;
-//		BFS<m>(matrix, visited i, j);
-//		for(int k = 0; k < m*2; ++k) {
-//
-//
-//		}
-//	  }
-//	}
+	cout << how_much(u, n, m) << endl;
   }
 }
-//group BFS(bool** matrix, bool** visited, int m, int i, int j){
-//  for(int i = 0; i < m*2; ++i) {
-//	for(int j = 0; j < m*2; ++j) {
-//	  cout << matrix[i][j] << ' ';
-//	}
-//	cout << endl;
-//  }
-//}
+bool contains(unordered_set<int> v, int i) {
+  return v.find(i) != v.end();
+}
+group BFS(group g, UndirectedGraph &u, unordered_set<int> &visited, int i, int m) {
+  int s = u.size;
+  if(i<s/2) ++g.a;
+  else ++g.b;
+  visited.insert(i);
+  set<int> edges = u.getEdges(i);
+  for(auto i : edges) {
+	if(!contains(visited, i))
+	  g = BFS(g, u, visited, i, m);
+  }
+  return g;
+}
+int how_much(UndirectedGraph &u, int n, int m) {
+	if(m==0) return n / 2;
+	vector<group> groups;
+	unordered_set<int> visited;
+	for(int i = 0; i < n*2; ++i) {
+	  group g {0, 0};
+	  if(!contains(visited, i)) groups.push_back(BFS(g, u, visited, i, m));
+	}
+	for(auto i : groups) {
+	  cout << i.a << ' ' << i.b << endl;
+	}
+	return -1;
+}
